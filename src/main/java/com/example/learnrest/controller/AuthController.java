@@ -1,0 +1,31 @@
+package com.example.learnrest.controller;
+
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.example.learnrest.dto.RegisterRequest;
+import com.example.learnrest.security.JwtUtil;
+
+
+@RestController
+@RequestMapping("/api/v1/auth")
+public class AuthController {
+  private final JwtUtil jwtUtil;
+
+  public AuthController(JwtUtil jwtUtil) {
+      this.jwtUtil = jwtUtil;
+  }
+
+  @PostMapping("/register")
+  public String postMethodName(@RequestBody RegisterRequest req) {
+    Map<String, Object> claims = jwtUtil.generateClaims(req.getName());
+    String token = jwtUtil.generateToken(req.getEmail(), claims);
+      
+    return token;
+  }
+  
+}
