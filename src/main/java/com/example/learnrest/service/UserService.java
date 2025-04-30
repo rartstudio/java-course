@@ -42,10 +42,12 @@ public class UserService {
 
     // token
     String token = jwtUtil.generateToken(req.getEmail(), claims);
+    String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
 
     // Return JSON:API compliant response
     Map<String, Object> attributes = new HashMap<>();
-    attributes.put("token", token);
+    attributes.put("access_token", token);
+    attributes.put("refresh_token", refreshToken);
 
     return new JsonApiResponse("users", String.valueOf('-'), attributes);
   }

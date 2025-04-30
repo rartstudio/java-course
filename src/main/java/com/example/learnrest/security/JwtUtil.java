@@ -30,6 +30,15 @@ public class JwtUtil {
       .compact();
   }
 
+  public String generateRefreshToken(String email) {
+    return Jwts.builder()
+      .subject(email)
+      .issuedAt(new Date())
+      .expiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
+      .signWith(key)
+      .compact();
+  }
+
   public Map<String, Object> generateClaims(String name) {
     Map<String, Object> claims = new HashMap<>();
     claims.put("name", name);
