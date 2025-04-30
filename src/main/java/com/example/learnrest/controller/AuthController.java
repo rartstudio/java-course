@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.learnrest.dto.JsonApiResponse;
 import com.example.learnrest.dto.RegisterRequest;
 import com.example.learnrest.service.UserService;
 
@@ -21,9 +22,7 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public String registerHandler(@Valid @RequestBody RegisterRequest req) {
-    String token = userService.registerUser(req);
-      
-    return token;
+  public JsonApiResponse registerHandler(@Valid @RequestBody RegisterRequest req) {  
+    return userService.registerUser(req);
   }
 }

@@ -13,27 +13,57 @@ import jakarta.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-  
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-      Map<String, String> errors = new HashMap<>();
-      ex.getBindingResult().getFieldErrors().forEach(error -> 
-          errors.put(error.getField(), error.getDefaultMessage())
-      );
-      return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+            errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation Error", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-  @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
-    Map<String, String> errors = new HashMap<>();
-    ex.getConstraintViolations().forEach(violation -> 
-      errors.put(violation.getPropertyPath().toString(), violation.getMessage())
-    );
-    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-  }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> 
+            errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+        );
 
-  @ExceptionHandler(DuplicateEmailException.class)
-  public ResponseEntity<String> handleDuplicateEmailException(DuplicateEmailException ex) {
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-  }
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Constraint Violation", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateEmailException(DuplicateEmailException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Duplicate Email", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private Object[] buildJsonApiErrors(HttpStatus status, String title, Map<String, String> errors) {
+        return errors.entrySet().stream()
+            .map(entry -> {
+                Map<String, Object> errorDetails = new HashMap<>();
+                errorDetails.put("status", String.valueOf(status.value()));
+                errorDetails.put("title", title);
+                errorDetails.put("detail", entry.getValue());
+                errorDetails.put("source", Map.of("pointer", entry.getKey()));
+                return errorDetails;
+            })
+            .toArray();
+    }
 }
