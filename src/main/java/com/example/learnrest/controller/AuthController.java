@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.learnrest.dto.RegisterRequest;
 import com.example.learnrest.security.JwtUtil;
 
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -21,7 +23,7 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public String registerHandler(@RequestBody RegisterRequest req) {
+  public String registerHandler(@Valid @RequestBody RegisterRequest req) {
     Map<String, Object> claims = jwtUtil.generateClaims(req.getName());
     String token = jwtUtil.generateToken(req.getEmail(), claims);
       
