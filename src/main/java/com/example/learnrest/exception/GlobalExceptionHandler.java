@@ -27,8 +27,13 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
     Map<String, String> errors = new HashMap<>();
     ex.getConstraintViolations().forEach(violation -> 
-        errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+      errors.put(violation.getPropertyPath().toString(), violation.getMessage())
     );
     return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DuplicateEmailException.class)
+  public ResponseEntity<String> handleDuplicateEmailException(DuplicateEmailException ex) {
+    return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }
