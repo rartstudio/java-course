@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.learnrest.dto.JsonApiResponse;
+import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.service.UserService;
@@ -39,5 +40,12 @@ public class AuthController {
     userService.validateEmail(req);
     
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("users"));
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<JsonApiResponse> loginHandler(@Valid @RequestBody LoginRequest req) {
+    // Authenticate the user and generate tokens
+    Map<String, Object> responseData = userService.loginUser(req);
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("users", responseData));
   }
 }

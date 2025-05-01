@@ -16,6 +16,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/auth/register").permitAll() // Allow public access to /register
             .requestMatchers("/api/v1/auth/validate").permitAll()
+            .requestMatchers("/api/v1/auth/login").permitAll()
             .anyRequest().authenticated() // Protect all other endpoints
         );
     return http.build();

@@ -8,10 +8,12 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.exception.DuplicateEmailException;
+import com.example.learnrest.exception.InvalidCredentialsException;
 import com.example.learnrest.exception.ValidationTokenEmailExpiredException;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.security.JwtUtil;
@@ -84,5 +86,29 @@ public class UserService {
     LocalDateTime userValidateAt = LocalDateTime.now();
     user.setUserValidateAt(userValidateAt); // Mark email as verified
     userRepository.save(user);
+  }
+
+  public Map<String, Object> loginUser(LoginRequest req) {
+    // Find the user by email
+    User user = userRepository.findByEmail(req.getEmail())
+    .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
+    // Check if the password matches
+    if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
+      throw new InvalidCredentialsException("Invalid email or password");
+    }
+
+    // Generate JWT tokens
+    Map<String, Object> claims = jwtUtil.generateClaims(user.getName());
+    String accessToken = jwtUtil.generateToken(user.getEmail(), claims);
+    String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+    // Build the response data
+    Map<String, Object> responseData = new HashMap<>();
+    responseData.put("id", user.getId());
+    responseData.put("access_token", accessToken);
+    responseData.put("refresh_token", refreshToken);
+
+    return responseData;
   }
 }
