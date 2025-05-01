@@ -1,5 +1,6 @@
 package com.example.learnrest.util;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.example.learnrest.dto.JsonApiResponse;
@@ -13,5 +14,11 @@ public class JsonApiHelper {
     attributes.remove("id");
 
     return new JsonApiResponse(type, id, attributes);
+  }
+
+  // Overloaded method without attributes parameter
+  public static JsonApiResponse createResponse(String type) {
+    // Call the main method with an empty map for attributes
+    return createResponse(type, Collections.emptyMap());
   }
 }

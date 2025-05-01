@@ -15,6 +15,7 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf.disable()) // Disable CSRF using Lambda DSL
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/auth/register").permitAll() // Allow public access to /register
+            .requestMatchers("/api/v1/auth/validate").permitAll()
             .anyRequest().authenticated() // Protect all other endpoints
         );
     return http.build();

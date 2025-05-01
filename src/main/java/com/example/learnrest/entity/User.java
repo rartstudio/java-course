@@ -21,6 +21,7 @@ public class User {
 
   private String validationToken;
   private LocalDateTime validationTokenExpiry;
+  private LocalDateTime userValidateAt;
 
   // Getters and Setters
   public Long getId() {
@@ -69,5 +70,13 @@ public class User {
 
   public void setValidationTokenExpiry(LocalDateTime validationTokenExpiry) {
     this.validationTokenExpiry = validationTokenExpiry;
+  }
+
+  public LocalDateTime getUserValidateAt() {
+    return userValidateAt;
+  }
+
+  public void setUserValidateAt(LocalDateTime userValidateAt) {
+    this.userValidateAt = userValidateAt;
   }
 }

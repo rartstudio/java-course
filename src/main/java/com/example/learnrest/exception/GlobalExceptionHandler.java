@@ -54,6 +54,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ValidationTokenEmailExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationTokenEmailExpiredException(ValidationTokenEmailExpiredException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Duplicate Email", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     private Object[] buildJsonApiErrors(HttpStatus status, String title, Map<String, String> errors) {
         return errors.entrySet().stream()
             .map(entry -> {

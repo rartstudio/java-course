@@ -8,9 +8,11 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.learnrest.dto.RegisterRequest;
+import com.example.learnrest.dto.auth.RegisterRequest;
+import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.exception.DuplicateEmailException;
+import com.example.learnrest.exception.ValidationTokenEmailExpiredException;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.security.JwtUtil;
 
@@ -64,5 +66,23 @@ public class UserService {
     responseData.put("refresh_token", refreshToken);
 
     return responseData;
+  }
+
+  public void validateEmail(ValidateRequest req) {
+    // Find the user by their validation token
+    User user = userRepository.findByValidationToken(req.getToken())
+    .orElseThrow(() -> new ValidationTokenEmailExpiredException("Invalid validation token"));
+
+    if (user.getValidationTokenExpiry().isBefore(LocalDateTime.now())) {
+      throw new ValidationTokenEmailExpiredException("The validation token has expired");
+    }
+
+    // Mark the user's email as validated
+    user.setValidationToken(null); // Clear the token
+    user.setValidationTokenExpiry(null); // Clear the expiry
+
+    LocalDateTime userValidateAt = LocalDateTime.now();
+    user.setUserValidateAt(userValidateAt); // Mark email as verified
+    userRepository.save(user);
   }
 }
