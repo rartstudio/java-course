@@ -1,5 +1,7 @@
 package com.example.learnrest.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +18,9 @@ public class User {
   private String name;
   private String email;
   private String password;
+
+  private String validationToken;
+  private LocalDateTime validationTokenExpiry;
 
   // Getters and Setters
   public Long getId() {
@@ -48,5 +53,21 @@ public class User {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getValidationToken() {
+    return validationToken;
+  }
+
+  public void setValidationToken(String validationToken) {
+    this.validationToken = validationToken;
+  }
+
+  public LocalDateTime getValidationTokenExpiry() {
+    return validationTokenExpiry;
+  }
+
+  public void setValidationTokenExpiry(LocalDateTime validationTokenExpiry) {
+    this.validationTokenExpiry = validationTokenExpiry;
   }
 }

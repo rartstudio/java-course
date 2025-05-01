@@ -1,7 +1,9 @@
 package com.example.learnrest.service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,11 +19,13 @@ public class UserService {
   private final UserRepository userRepository;
   private final JwtUtil jwtUtil;
   private final PasswordEncoder passwordEncoder;
+  private final EmailService emailService;
 
-  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder) {
+  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService) {
     this.userRepository = userRepository;
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
+    this.emailService = emailService;
   }
 
   public Map<String, Object> registerUser(RegisterRequest req) {
@@ -29,12 +33,22 @@ public class UserService {
       throw new DuplicateEmailException("Email already registered");
     }
 
-     // save to database
+    // save to database
     User user = new User();
     user.setName(req.getName());
     user.setEmail(req.getEmail());
     user.setPassword(passwordEncoder.encode(req.getPassword()));
+
+    // generate a unique validation token
+    String validationToken = UUID.randomUUID().toString();
+    LocalDateTime validationTokenExpiry = LocalDateTime.now().plusHours(24);
+
+    user.setValidationToken(validationToken);
+    user.setValidationTokenExpiry(validationTokenExpiry);
     userRepository.save(user);
+
+    // send email
+    emailService.sendValidationEmail(req.getEmail(), validationToken);
 
     // claims token
     Map<String, Object> claims = jwtUtil.generateClaims(req.getName());
