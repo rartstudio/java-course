@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.learnrest.dto.JsonApiResponse;
 import com.example.learnrest.dto.RegisterRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.exception.DuplicateEmailException;
@@ -25,7 +24,7 @@ public class UserService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  public JsonApiResponse registerUser(RegisterRequest req) {
+  public Map<String, Object> registerUser(RegisterRequest req) {
     if (userRepository.existsByEmail(req.getEmail())) {
       throw new DuplicateEmailException("Email already registered");
     }
@@ -44,11 +43,12 @@ public class UserService {
     String token = jwtUtil.generateToken(req.getEmail(), claims);
     String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
 
-    // Return JSON:API compliant response
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("access_token", token);
-    attributes.put("refresh_token", refreshToken);
+    // result
+    Map<String, Object> responseData = new HashMap<>();
+    responseData.put("id", '-');
+    responseData.put("access_token", token);
+    responseData.put("refresh_token", refreshToken);
 
-    return new JsonApiResponse("users", String.valueOf('-'), attributes);
+    return responseData;
   }
 }
