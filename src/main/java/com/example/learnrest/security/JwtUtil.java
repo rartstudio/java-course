@@ -57,4 +57,13 @@ public class JwtUtil {
       return false;
     }
   }
+
+  public String extractSubject(String token) {
+    return Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload()
+        .getSubject();
+  }
 }

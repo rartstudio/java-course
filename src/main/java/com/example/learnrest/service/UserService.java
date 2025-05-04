@@ -98,6 +98,11 @@ public class UserService {
       throw new InvalidCredentialsException("Invalid email or password");
     }
 
+    // check if user is validated
+    if (user.getUserValidateAt() == null) {
+      throw new InvalidCredentialsException("Account not validated yet");
+    }
+
     // Generate JWT tokens
     Map<String, Object> claims = jwtUtil.generateClaims(user.getName());
     String accessToken = jwtUtil.generateToken(user.getEmail(), claims);

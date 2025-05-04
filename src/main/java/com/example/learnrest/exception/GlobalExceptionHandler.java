@@ -62,8 +62,19 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
 
-        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Duplicate Email", errors));
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation token email expired", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleJwtAuthenticationException(JwtAuthenticationException ex) {
+      Map<String, Object> errorResponse = new HashMap<>();
+      
+      Map<String, String> errors = new HashMap<>();
+      errors.put("authorization", ex.getMessage());
+
+      errorResponse.put("errors", buildJsonApiErrors(ex.getStatus(), "JWT Authentication Failed", errors));
+      return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
     private Object[] buildJsonApiErrors(HttpStatus status, String title, Map<String, String> errors) {
