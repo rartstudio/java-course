@@ -1,11 +1,6 @@
 package com.example.learnrest.entity;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +10,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -27,37 +22,6 @@ public class User implements UserDetails {
   private String validationToken;
   private LocalDateTime validationTokenExpiry;
   private LocalDateTime userValidateAt;
-
-  // Required by UserDetails interface
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public String getUsername() {
-    return email;
-  }
-
-  @Override
-  public boolean isAccountNonExpired() {
-    return true;
-  }
-
-  @Override
-  public boolean isAccountNonLocked() {
-    return true;
-  }
-
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return true;
-  }
-
-  @Override
-  public boolean isEnabled() {
-    return true;
-  }
 
   // Getters and Setters
   public Long getId() {

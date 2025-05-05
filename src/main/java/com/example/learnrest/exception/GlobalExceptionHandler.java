@@ -50,7 +50,19 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
 
-        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Duplicate Email", errors));
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Email", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Credential", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -62,7 +74,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
 
-        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation token email expired", errors));
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation Token Email", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
