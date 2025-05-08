@@ -44,6 +44,9 @@ dependencies {
 
   // Email
   implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+  // Amazon S3
+  implementation 'software.amazon.awssdk:s3:2.30.16' // or latest version
 }
 
 tasks.named('test') {

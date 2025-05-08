@@ -2,10 +2,12 @@ package com.example.learnrest.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -78,5 +80,16 @@ public class User {
 
   public void setUserValidateAt(LocalDateTime userValidateAt) {
     this.userValidateAt = userValidateAt;
+  }
+
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  private UserProfile profile;
+
+  public UserProfile getProfile() {
+    return profile;
+  }
+
+  public void setProfile(UserProfile profile) {
+    this.profile = profile;
   }
 }

@@ -7,14 +7,20 @@ import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
+import com.example.learnrest.dto.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
+import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.exception.DuplicateEmailException;
+import com.example.learnrest.exception.ImageUploadException;
 import com.example.learnrest.exception.InvalidCredentialsException;
+import com.example.learnrest.exception.NotFoundException;
 import com.example.learnrest.exception.ValidationTokenEmailExpiredException;
+import com.example.learnrest.repository.UserProfileRepository;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.security.JwtUtil;
 
@@ -24,12 +30,16 @@ public class UserService {
   private final JwtUtil jwtUtil;
   private final PasswordEncoder passwordEncoder;
   private final EmailService emailService;
+  private final S3Service s3Service;
+  private final UserProfileRepository userProfileRepository;
 
-  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService) {
+  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, S3Service s3Service, UserProfileRepository userProfileRepository) {
     this.userRepository = userRepository;
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
     this.emailService = emailService;
+    this.s3Service = s3Service;
+    this.userProfileRepository = userProfileRepository;
   }
 
   public Map<String, Object> registerUser(RegisterRequest req) {
@@ -64,8 +74,8 @@ public class UserService {
     // result
     Map<String, Object> responseData = new HashMap<>();
     responseData.put("id", '-');
-    responseData.put("access_token", token);
-    responseData.put("refresh_token", refreshToken);
+    responseData.put("accessToken", token);
+    responseData.put("refreshToken", refreshToken);
 
     return responseData;
   }
@@ -111,9 +121,39 @@ public class UserService {
     // Build the response data
     Map<String, Object> responseData = new HashMap<>();
     responseData.put("id", user.getId());
-    responseData.put("access_token", accessToken);
-    responseData.put("refresh_token", refreshToken);
+    responseData.put("accessToken", accessToken);
+    responseData.put("refreshToken", refreshToken);
 
     return responseData;
+  }
+
+  public User getUser(String email) {
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
+
+    return user;
+  }
+
+  public UserProfile createProfile(CreateProfileForm form, String email) {
+    MultipartFile image = form.getImage();
+
+    String imageUrl;
+    try {
+      imageUrl = s3Service.uploadFile(image);
+    } catch (Exception e) {
+      throw new ImageUploadException("Failed to upload image to S3");
+    }
+
+    User user = getUser(email);
+
+    UserProfile profile = new UserProfile();
+    profile.setDateOfBirth(form.getDateOfBirth());
+    profile.setImage(imageUrl);
+    profile.setUser(user);
+
+    userProfileRepository.save(profile);
+
+    UserProfile saved = userProfileRepository.save(profile);
+
+    return saved;
   }
 }
