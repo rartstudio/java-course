@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.learnrest.validator.ValidImage;
+import com.example.learnrest.validation.ValidImage;
 
 import jakarta.validation.constraints.NotNull;
 

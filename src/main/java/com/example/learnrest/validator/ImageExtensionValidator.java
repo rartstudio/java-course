@@ -2,6 +2,8 @@ package com.example.learnrest.validator;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.learnrest.validation.ValidImage;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

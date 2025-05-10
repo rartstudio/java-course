@@ -81,15 +81,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ValidationTokenEmailExpiredException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationTokenEmailExpiredException(ValidationTokenEmailExpiredException ex) {
+    @ExceptionHandler(ValidationTokenExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationTokenEmailExpiredException(ValidationTokenExpiredException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
         
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
 
-        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation Token Email", errors));
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation Token Expired", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

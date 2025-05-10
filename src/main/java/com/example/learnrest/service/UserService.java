@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
+import com.example.learnrest.dto.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.dto.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
@@ -21,7 +24,7 @@ import com.example.learnrest.exception.DuplicateEmailException;
 import com.example.learnrest.exception.ImageUploadException;
 import com.example.learnrest.exception.InvalidCredentialsException;
 import com.example.learnrest.exception.NotFoundException;
-import com.example.learnrest.exception.ValidationTokenEmailExpiredException;
+import com.example.learnrest.exception.ValidationTokenExpiredException;
 import com.example.learnrest.repository.UserProfileRepository;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.security.JwtUtil;
@@ -34,6 +37,7 @@ public class UserService {
   private final EmailService emailService;
   private final S3Service s3Service;
   private final UserProfileRepository userProfileRepository;
+  private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
   public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, S3Service s3Service, UserProfileRepository userProfileRepository) {
     this.userRepository = userRepository;
@@ -85,10 +89,10 @@ public class UserService {
   public void validateEmail(ValidateRequest req) {
     // Find the user by their validation token
     User user = userRepository.findByValidationToken(req.getToken())
-    .orElseThrow(() -> new ValidationTokenEmailExpiredException("Invalid validation token"));
+    .orElseThrow(() -> new ValidationTokenExpiredException("Invalid validation token"));
 
     if (user.getValidationTokenExpiry().isBefore(LocalDateTime.now())) {
-      throw new ValidationTokenEmailExpiredException("The validation token has expired");
+      throw new ValidationTokenExpiredException("The validation token has expired");
     }
 
     // Mark the user's email as validated
@@ -180,6 +184,22 @@ public class UserService {
 
     // send email
     emailService.sendEmailValidationUser(req.getEmail(), token);
+  }
 
+  public void resetPassword(ResetPasswordRequest req) {
+    User user = userRepository.findByResetPasswordToken(req.getToken())
+    .orElseThrow(() -> new ValidationTokenExpiredException("Invalid validation token"));
+
+    logger.info("Email sent successfully to: {}", user.getResetPasswordToken());
+
+    if (user.getResetPasswordTokenExpiry() == null || user.getResetPasswordTokenExpiry().isBefore(LocalDateTime.now())) {
+      throw new ValidationTokenExpiredException("Reset token has expired");
+    }
+
+    user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+    user.setResetPasswordToken(null);
+    user.setResetPasswordTokenExpiry(null);
+
+    userRepository.save(user);
   }
 }

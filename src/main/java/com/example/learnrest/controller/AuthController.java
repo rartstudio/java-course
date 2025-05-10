@@ -13,6 +13,7 @@ import com.example.learnrest.dto.JsonApiResponse;
 import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
+import com.example.learnrest.dto.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.service.UserService;
 import com.example.learnrest.util.JsonApiHelper;
@@ -56,4 +57,11 @@ public class AuthController {
     
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("user"));
   }  
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<JsonApiResponse> resetPasswordHandler(@Valid @RequestBody ResetPasswordRequest req) {
+    userService.resetPassword(req);
+    
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("user"));   
+  }
 }

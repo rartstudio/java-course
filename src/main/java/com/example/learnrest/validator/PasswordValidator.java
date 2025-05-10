@@ -1,5 +1,7 @@
 package com.example.learnrest.validator;
 
+import com.example.learnrest.validation.ValidPassword;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

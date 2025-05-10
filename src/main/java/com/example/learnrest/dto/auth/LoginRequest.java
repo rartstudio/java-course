@@ -1,6 +1,6 @@
 package com.example.learnrest.dto.auth;
 
-import com.example.learnrest.validator.ValidPassword;
+import com.example.learnrest.validation.ValidPassword;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
