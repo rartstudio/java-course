@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
+import com.example.learnrest.dto.auth.RefreshTokenRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
@@ -23,6 +24,7 @@ import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.exception.DuplicateEmailException;
 import com.example.learnrest.exception.ImageUploadException;
 import com.example.learnrest.exception.InvalidCredentialsException;
+import com.example.learnrest.exception.InvalidRefreshTokenException;
 import com.example.learnrest.exception.NotFoundException;
 import com.example.learnrest.exception.ValidationTokenExpiredException;
 import com.example.learnrest.repository.UserProfileRepository;
@@ -201,5 +203,26 @@ public class UserService {
     user.setResetPasswordTokenExpiry(null);
 
     userRepository.save(user);
+  }
+
+  public Map<String, Object> refreshToken(RefreshTokenRequest req) {
+    if (!jwtUtil.validateToken(req.getRefreshToken())) {
+      throw new InvalidRefreshTokenException("Invalid refresh token");
+    }
+
+    String email = jwtUtil.extractSubject(req.getRefreshToken());
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new NotFoundException("User not found"));
+
+    Map<String, Object> claims = jwtUtil.generateClaims(user.getName());
+
+    String newAccessToken = jwtUtil.generateToken(user.getEmail(), claims);
+    String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+    Map<String, Object> tokens = new HashMap<>();
+    tokens.put("accessToken", newAccessToken);
+    tokens.put("refreshToken", newRefreshToken);
+
+    return tokens;
   }
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.learnrest.dto.JsonApiResponse;
 import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
+import com.example.learnrest.dto.auth.RefreshTokenRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
@@ -64,4 +65,12 @@ public class AuthController {
     
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("user"));   
   }
+
+  @PostMapping("/refresh-token")
+  public ResponseEntity<JsonApiResponse> refreshTokenHandler(@Valid @RequestBody RefreshTokenRequest req) {
+    Map<String, Object> responseData = userService.refreshToken(req);
+
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("user", responseData));   
+  }
+  
 }

@@ -93,6 +93,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        errors.put("email", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Token not valid", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
