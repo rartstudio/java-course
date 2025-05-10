@@ -17,7 +17,7 @@ public class EmailService {
   }
 
   @Async
-  public void sendValidationEmail(String to, String validationToken) {
+  public void sendEmailValidationUser(String to, String validationToken) {
     logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
 
     String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
@@ -26,6 +26,21 @@ public class EmailService {
     message.setTo(to);
     message.setSubject("Verify Your Email Address");
     message.setText("Please click the link below to validate your email address:\n\n" + validationLink);
+    mailSender.send(message);
+
+    logger.info("Email sent successfully to: {}", to);
+  }
+
+  @Async
+  public void sendEmailResetPassword(String to, String validationToken) {
+    logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
+
+    String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom("no-reply@example.com");
+    message.setTo(to);
+    message.setSubject("Verify Your Email Address");
+    message.setText("Please click the link below to reset your password:\n\n" + validationLink);
     mailSender.send(message);
 
     logger.info("Email sent successfully to: {}", to);

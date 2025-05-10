@@ -25,6 +25,9 @@ public class User {
   private LocalDateTime validationTokenExpiry;
   private LocalDateTime userValidateAt;
 
+  private String resetPasswordToken;
+  private LocalDateTime resetPasswordTokenExpiry;
+
   // Getters and Setters
   public Long getId() {
     return id;
@@ -91,5 +94,21 @@ public class User {
 
   public void setProfile(UserProfile profile) {
     this.profile = profile;
+  }
+
+  public String getResetPasswordToken() {
+    return resetPasswordToken;
+}
+
+  public void setResetPasswordToken(String resetPasswordToken) {
+    this.resetPasswordToken = resetPasswordToken;
+  }
+
+  public LocalDateTime getResetPasswordTokenExpiry() {
+    return resetPasswordTokenExpiry;
+  }
+
+  public void setResetPasswordTokenExpiry(LocalDateTime resetPasswordTokenExpiry) {
+    this.resetPasswordTokenExpiry = resetPasswordTokenExpiry;
   }
 }

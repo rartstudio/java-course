@@ -3,12 +3,14 @@ package com.example.learnrest.service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
@@ -62,7 +64,7 @@ public class UserService {
     userRepository.save(user);
 
     // send email
-    emailService.sendValidationEmail(req.getEmail(), validationToken);
+    emailService.sendEmailValidationUser(req.getEmail(), validationToken);
 
     // claims token
     Map<String, Object> claims = jwtUtil.generateClaims(req.getName());
@@ -155,5 +157,29 @@ public class UserService {
     UserProfile saved = userProfileRepository.save(profile);
 
     return saved;
+  }
+
+  public void generateResetPasswordToken(ForgotPasswordRequest req) {
+    Optional<User> userOpt = userRepository.findByEmail(req.getEmail());
+    if (userOpt.isEmpty()) {
+      // Don't leak email info — silently ignore
+      return;
+    }
+
+    // get the user data
+    User user = userOpt.get();
+
+    // generate token and expired time token
+    String token = UUID.randomUUID().toString();
+    LocalDateTime expiry = LocalDateTime.now().plusMinutes(30);
+
+    // save it to database
+    user.setResetPasswordToken(token);
+    user.setResetPasswordTokenExpiry(expiry);
+    userRepository.save(user);
+
+    // send email
+    emailService.sendEmailValidationUser(req.getEmail(), token);
+
   }
 }

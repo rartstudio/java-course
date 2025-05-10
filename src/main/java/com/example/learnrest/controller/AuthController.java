@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.learnrest.dto.JsonApiResponse;
+import com.example.learnrest.dto.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.auth.LoginRequest;
 import com.example.learnrest.dto.auth.RegisterRequest;
 import com.example.learnrest.dto.auth.ValidateRequest;
@@ -48,4 +49,11 @@ public class AuthController {
     Map<String, Object> responseData = userService.loginUser(req);
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("users", responseData));
   }
+
+  @PostMapping("/forgot-password")
+  public ResponseEntity<JsonApiResponse> forgotPasswordHandler(@Valid @RequestBody ForgotPasswordRequest req) {
+    userService.generateResetPasswordToken(req);
+    
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createResponse("user"));
+  }  
 }
