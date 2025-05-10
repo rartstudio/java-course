@@ -196,7 +196,7 @@ public class UserService {
       throw new ValidationTokenExpiredException("Reset token has expired");
     }
 
-    user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+    user.setPassword(passwordEncoder.encode(req.getPassword()));
     user.setResetPasswordToken(null);
     user.setResetPasswordTokenExpiry(null);
 

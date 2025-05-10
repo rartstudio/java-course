@@ -18,12 +18,18 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
             String password = (String) getPassword.invoke(obj);
             String confirmPassword = (String) getConfirmPassword.invoke(obj);
 
-            if (password == null || confirmPassword == null) {
-                return false;
+            if (password == null || confirmPassword == null || !password.equals(confirmPassword)) {
+              // Show the error at the class level
+              context.disableDefaultConstraintViolation();
+              context.buildConstraintViolationWithTemplate("Passwords do not match")
+                    .addPropertyNode("confirmPassword") // or omit this to attach to the object
+                    .addConstraintViolation();
+              return false;
             }
 
-            return password.equals(confirmPassword);
+            return true;
         } catch (Exception e) {
+            e.printStackTrace(); // Useful for debugging
             return false;
         }
     }

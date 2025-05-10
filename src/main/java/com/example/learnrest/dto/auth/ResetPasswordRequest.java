@@ -1,8 +1,11 @@
 package com.example.learnrest.dto.auth;
 
+import com.example.learnrest.validation.PasswordMatches;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@PasswordMatches
 public class ResetPasswordRequest {
 
   @NotBlank
@@ -10,7 +13,7 @@ public class ResetPasswordRequest {
 
   @NotBlank
   @Size(min = 8, message = "Password must be at least 8 characters")
-  private String newPassword;
+  private String password;
 
   @NotBlank
   private String confirmPassword;
@@ -24,12 +27,12 @@ public class ResetPasswordRequest {
       this.token = token;
   }
 
-  public String getNewPassword() {
-      return newPassword;
+  public String getPassword() {
+      return password;
   }
 
-  public void setNewPassword(String newPassword) {
-      this.newPassword = newPassword;
+  public void setPassword(String password) {
+      this.password = password;
   }
 
   public String getConfirmPassword() {
