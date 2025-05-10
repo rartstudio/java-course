@@ -1,4 +1,4 @@
-package com.example.learnrest.dto.user;
+package com.example.learnrest.dto.request.user;
 
 import java.time.LocalDate;
 

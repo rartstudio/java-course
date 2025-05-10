@@ -3,6 +3,7 @@ package com.example.learnrest.service;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,13 +14,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.learnrest.dto.auth.ForgotPasswordRequest;
-import com.example.learnrest.dto.auth.LoginRequest;
-import com.example.learnrest.dto.auth.RefreshTokenRequest;
-import com.example.learnrest.dto.auth.RegisterRequest;
-import com.example.learnrest.dto.auth.ResetPasswordRequest;
-import com.example.learnrest.dto.auth.ValidateRequest;
-import com.example.learnrest.dto.user.CreateProfileForm;
+import com.example.learnrest.dto.request.auth.ForgotPasswordRequest;
+import com.example.learnrest.dto.request.auth.LoginRequest;
+import com.example.learnrest.dto.request.auth.RefreshTokenRequest;
+import com.example.learnrest.dto.request.auth.RegisterRequest;
+import com.example.learnrest.dto.request.auth.ResetPasswordRequest;
+import com.example.learnrest.dto.request.auth.ValidateRequest;
+import com.example.learnrest.dto.request.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.entity.UserSession;
@@ -240,5 +241,11 @@ public class UserService {
     tokens.put("refreshToken", newRefreshToken);
 
     return tokens;
+  }
+
+  public List<UserSession> getUserSession(User user) {
+    List<UserSession> sessions = userSessionRepository.findByUser(user);
+
+    return sessions;
   }
 }

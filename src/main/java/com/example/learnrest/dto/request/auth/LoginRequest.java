@@ -1,4 +1,4 @@
-package com.example.learnrest.dto.auth;
+package com.example.learnrest.dto.request.auth;
 
 import com.example.learnrest.validation.ValidPassword;
 
