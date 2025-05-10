@@ -10,7 +10,7 @@
 ./create_migration.sh <migration_name>
 ```
 
-##### Restart Gradle
+##### Restart Gradle and Rebuild Project
 
 ```bash
 ./gradlew --stop
