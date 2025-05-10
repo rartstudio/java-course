@@ -1,6 +1,7 @@
 package com.example.learnrest.service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.dto.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserProfile;
+import com.example.learnrest.entity.UserSession;
 import com.example.learnrest.exception.DuplicateEmailException;
 import com.example.learnrest.exception.ImageUploadException;
 import com.example.learnrest.exception.InvalidCredentialsException;
@@ -29,6 +31,7 @@ import com.example.learnrest.exception.NotFoundException;
 import com.example.learnrest.exception.ValidationTokenExpiredException;
 import com.example.learnrest.repository.UserProfileRepository;
 import com.example.learnrest.repository.UserRepository;
+import com.example.learnrest.repository.UserSessionRepository;
 import com.example.learnrest.security.JwtUtil;
 
 @Service
@@ -39,18 +42,20 @@ public class UserService {
   private final EmailService emailService;
   private final S3Service s3Service;
   private final UserProfileRepository userProfileRepository;
+  private final UserSessionRepository userSessionRepository;
   private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, S3Service s3Service, UserProfileRepository userProfileRepository) {
+  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, S3Service s3Service, UserProfileRepository userProfileRepository, UserSessionRepository userSessionRepository) {
     this.userRepository = userRepository;
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
     this.emailService = emailService;
     this.s3Service = s3Service;
     this.userProfileRepository = userProfileRepository;
+    this.userSessionRepository = userSessionRepository;
   }
 
-  public Map<String, Object> registerUser(RegisterRequest req) {
+  public Map<String, Object> registerUser(RegisterRequest req, String ipAddress, String userAgent) {
     if (userRepository.existsByEmail(req.getEmail())) {
       throw new DuplicateEmailException("Email already registered");
     }
@@ -78,6 +83,17 @@ public class UserService {
     // token
     String token = jwtUtil.generateToken(req.getEmail(), claims);
     String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
+
+    // save session
+    UserSession session = new UserSession();
+    session.setUser(user);
+    session.setRefreshToken(refreshToken);
+    session.setIpAddress(ipAddress);
+    session.setDeviceInfo(userAgent);
+    session.setLoggedInAt(new Date());
+    session.setExpiresAt(new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000)); // 7 days
+    session.setRevoked(false);
+    userSessionRepository.save(session);
 
     // result
     Map<String, Object> responseData = new HashMap<>();

@@ -19,6 +19,7 @@ import com.example.learnrest.dto.auth.ValidateRequest;
 import com.example.learnrest.service.UserService;
 import com.example.learnrest.util.JsonApiHelper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 
@@ -32,8 +33,12 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<JsonApiResponse> registerHandler(@Valid @RequestBody RegisterRequest req) {  
-    Map<String, Object> responseData = userService.registerUser(req);
+  public ResponseEntity<JsonApiResponse> registerHandler(@Valid @RequestBody RegisterRequest req, HttpServletRequest request) {  
+    // Get IP address and user agent
+    String ipAddress = request.getRemoteAddr();
+    String userAgent = request.getHeader("User-Agent");
+
+    Map<String, Object> responseData = userService.registerUser(req, ipAddress, userAgent);
     
     return ResponseEntity.status(HttpStatus.CREATED).body(JsonApiHelper.createResponse("users", responseData));
   }
