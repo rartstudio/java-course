@@ -3,6 +3,7 @@ package com.example.learnrest.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +21,8 @@ import com.example.learnrest.dto.request.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.entity.UserSession;
+import com.example.learnrest.exception.DataConflictException;
+import com.example.learnrest.service.UserProfileService;
 import com.example.learnrest.service.UserService;
 import com.example.learnrest.util.JsonApiHelper;
 
@@ -29,9 +32,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/users")
 public class UserController {
   private final UserService userService;
+  private final UserProfileService userProfileService;
 
-  public UserController(UserService userService) {
+  public UserController(UserService userService, UserProfileService userProfileService) {
     this.userService = userService;
+    this.userProfileService = userProfileService;
   }
 
   @GetMapping("/profile")
@@ -39,19 +44,29 @@ public class UserController {
     // Fetch user from the database to ensure
     User dbUser = userService.getUserData(user.getId());
 
+    UserProfile profile = dbUser.getProfile(); // might be null
+
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("id", dbUser.getId());
     attributes.put("name", dbUser.getName());
     attributes.put("email", dbUser.getEmail());
-    attributes.put("image", dbUser.getProfile().getImage());
-    attributes.put("dateOfBirth", dbUser.getProfile().getDateOfBirth());
+    attributes.put("image", profile != null ? profile.getImage() : "-");
+    attributes.put("dateOfBirth", profile != null ? profile.getDateOfBirth() : "-");
 
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success get user profile"));
   }
 
   @PostMapping(value = "/profile", consumes={MediaType.MULTIPART_FORM_DATA_VALUE})
   public ResponseEntity<JsonApiSingleResponse> createProfileHandler(@Valid @ModelAttribute CreateProfileForm form,  @AuthenticationPrincipal User user) {
-    UserProfile profile = userService.createProfile(form, user.getEmail());
+    User dbUser = userService.getUser(user.getEmail());
+
+    Optional<UserProfile> userProfile = userProfileService.getProfile(dbUser);
+
+    if (userProfile.isPresent()) {
+      throw new DataConflictException("Data profile sudah ada");
+    }
+
+    UserProfile profile = userProfileService.createProfile(form, user);
 
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("image", profile.getImage());

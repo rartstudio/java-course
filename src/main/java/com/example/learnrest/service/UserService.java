@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.example.learnrest.dto.request.auth.ForgotPasswordRequest;
 import com.example.learnrest.dto.request.auth.LoginRequest;
@@ -20,12 +19,9 @@ import com.example.learnrest.dto.request.auth.RefreshTokenRequest;
 import com.example.learnrest.dto.request.auth.RegisterRequest;
 import com.example.learnrest.dto.request.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.request.auth.ValidateRequest;
-import com.example.learnrest.dto.request.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
-import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.entity.UserSession;
 import com.example.learnrest.exception.DuplicateEmailException;
-import com.example.learnrest.exception.ImageUploadException;
 import com.example.learnrest.exception.InvalidCredentialsException;
 import com.example.learnrest.exception.InvalidRefreshTokenException;
 import com.example.learnrest.exception.NotFoundException;
@@ -156,30 +152,6 @@ public class UserService {
     User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("User not found"));
 
     return user;
-  }
-
-  public UserProfile createProfile(CreateProfileForm form, String email) {
-    MultipartFile image = form.getImage();
-
-    String imageUrl;
-    try {
-      imageUrl = s3Service.uploadFile(image);
-    } catch (Exception e) {
-      throw new ImageUploadException("Failed to upload image to S3");
-    }
-
-    User user = getUser(email);
-
-    UserProfile profile = new UserProfile();
-    profile.setDateOfBirth(form.getDateOfBirth());
-    profile.setImage(imageUrl);
-    profile.setUser(user);
-
-    userProfileRepository.save(profile);
-
-    UserProfile saved = userProfileRepository.save(profile);
-
-    return saved;
   }
 
   public void generateResetPasswordToken(ForgotPasswordRequest req) {

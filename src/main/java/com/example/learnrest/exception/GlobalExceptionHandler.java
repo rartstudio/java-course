@@ -105,6 +105,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(DataConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleDataConflictException(DataConflictException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        
+        // Build the errors array
+        Map<String, String> errors = new HashMap<>();
+        errors.put("-", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(HttpStatus.CONFLICT, "Duplicate Data", errors));
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
