@@ -37,18 +37,14 @@ public class UserService {
   private final JwtUtil jwtUtil;
   private final PasswordEncoder passwordEncoder;
   private final EmailService emailService;
-  private final S3Service s3Service;
-  private final UserProfileRepository userProfileRepository;
   private final UserSessionRepository userSessionRepository;
   private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, S3Service s3Service, UserProfileRepository userProfileRepository, UserSessionRepository userSessionRepository) {
+  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, UserSessionRepository userSessionRepository) {
     this.userRepository = userRepository;
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
     this.emailService = emailService;
-    this.s3Service = s3Service;
-    this.userProfileRepository = userProfileRepository;
     this.userSessionRepository = userSessionRepository;
   }
 
