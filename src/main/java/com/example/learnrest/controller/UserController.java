@@ -37,12 +37,14 @@ public class UserController {
   @GetMapping("/profile")
   public ResponseEntity<JsonApiSingleResponse> getProfileHandler(@AuthenticationPrincipal User user) {
     // Fetch user from the database to ensure
-    User dbUser = userService.getUser(user.getEmail());
+    User dbUser = userService.getUserData(user.getId());
 
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("id", dbUser.getId());
     attributes.put("name", dbUser.getName());
     attributes.put("email", dbUser.getEmail());
+    attributes.put("image", dbUser.getProfile().getImage());
+    attributes.put("dateOfBirth", dbUser.getProfile().getDateOfBirth());
 
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success get user profile"));
   }

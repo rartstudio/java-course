@@ -52,8 +52,8 @@ public class AuthController {
 
   @PostMapping("/login")
   public ResponseEntity<JsonApiSingleResponse> loginHandler(@Valid @RequestBody LoginRequest req) {
-    // Authenticate the user and generate tokens
     Map<String, Object> responseData = userService.loginUser(req);
+    
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", responseData, "Success login"));
   }
 

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -85,7 +86,7 @@ public class User {
     this.userValidateAt = userValidateAt;
   }
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
   private UserProfile profile;
 
   public UserProfile getProfile() {

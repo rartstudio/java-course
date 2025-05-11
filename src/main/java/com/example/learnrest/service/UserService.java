@@ -248,4 +248,10 @@ public class UserService {
 
     return sessions;
   }
+
+  public User getUserData(Long id) {
+    User user = userRepository.findByIdWithProfile(id).orElseThrow(() -> new NotFoundException("User not found"));
+
+    return user;
+  }
 }
