@@ -50,8 +50,8 @@ public class UserController {
     attributes.put("id", dbUser.getId());
     attributes.put("name", dbUser.getName());
     attributes.put("email", dbUser.getEmail());
-    attributes.put("image", profile != null ? profile.getImage() : "-");
-    attributes.put("dateOfBirth", profile != null ? profile.getDateOfBirth() : "-");
+    attributes.put("image", profile != null ? profile.getImage() : null);
+    attributes.put("dateOfBirth", profile != null ? profile.getDateOfBirth() : null);
 
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success get user profile"));
   }
