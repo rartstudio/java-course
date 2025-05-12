@@ -23,10 +23,12 @@ import com.example.learnrest.dto.request.user.ChangePasswordRequest;
 import com.example.learnrest.dto.request.user.LogoutRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserSession;
+import com.example.learnrest.exception.ConflictException;
 import com.example.learnrest.exception.DuplicateEmailException;
 import com.example.learnrest.exception.InvalidCredentialsException;
 import com.example.learnrest.exception.InvalidRefreshTokenException;
 import com.example.learnrest.exception.NotFoundException;
+import com.example.learnrest.exception.UnauthorizedException;
 import com.example.learnrest.exception.ValidationTokenExpiredException;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.repository.UserSessionRepository;
@@ -215,7 +217,7 @@ public class UserService {
   }
 
   public List<UserSession> getUserSession(User user) {
-    List<UserSession> sessions = userSessionRepository.findByUser(user);
+    List<UserSession> sessions = userSessionRepository.findByUserAndRevokedFalse(user);
 
     return sessions;
   }
@@ -250,5 +252,21 @@ public class UserService {
         session.setLastUsedAt(new Date());
         userSessionRepository.save(session);
     }
+  }
+
+  public void removeUserSession(User user, Long sessionId) {
+    UserSession session = userSessionRepository.findById(sessionId)
+      .orElseThrow(() -> new NotFoundException("Session not found"));
+
+    if (!session.getUser().getId().equals(user.getId())) {
+      throw new UnauthorizedException("You cannot revoke another user's session");
+    }
+
+    if (session.isRevoked()) {
+      throw new ConflictException("Session already revoked");
+    }
+
+    session.setRevoked(true);
+    userSessionRepository.save(session);
   }
 }

@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -116,6 +118,14 @@ public class UserController {
         })
         .toList();
 
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createListResponse("users", attributes,"Success get user sessions"));
-  } 
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createListResponse("user_sessions", attributes,"Success get user sessions"));
+  }
+
+  @DeleteMapping(value = "/sessions/{id}")
+  public ResponseEntity<JsonApiSingleResponse> deleteUserSessionHandler(@AuthenticationPrincipal User user, @PathVariable Long id) {
+    User dbUser = userService.getUser(user.getEmail());
+    userService.removeUserSession(dbUser, id);
+    
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("user_sessions", "-", "Success remove session"));
+  }
 }
