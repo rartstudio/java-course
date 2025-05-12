@@ -20,6 +20,7 @@ import com.example.learnrest.dto.JsonApiListResponse;
 import com.example.learnrest.dto.JsonApiSingleResponse;
 import com.example.learnrest.dto.request.user.ChangePasswordRequest;
 import com.example.learnrest.dto.request.user.CreateProfileForm;
+import com.example.learnrest.dto.request.user.LogoutRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserProfile;
 import com.example.learnrest.entity.UserSession;
@@ -28,6 +29,7 @@ import com.example.learnrest.service.UserProfileService;
 import com.example.learnrest.service.UserService;
 import com.example.learnrest.util.JsonApiHelper;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -77,7 +79,7 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success create user profile"));
   }
 
-  @PostMapping(value="/change-password")
+  @PostMapping("/change-password")
   public ResponseEntity<JsonApiSingleResponse> changePasswordHandler(@Valid @RequestBody ChangePasswordRequest req,  @AuthenticationPrincipal User user) {
     User dbUser = userService.getUser(user.getEmail());
 
@@ -85,7 +87,19 @@ public class UserController {
 
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success change password"));
   }
+
+  @PostMapping("/logout")
+  public ResponseEntity<JsonApiSingleResponse> logoutHandler(@Valid @RequestBody LogoutRequest req, @AuthenticationPrincipal User user, HttpServletRequest request) {
+    User dbUser = userService.getUser(user.getEmail());
+
+    String userAgent = request.getHeader("User-Agent");
+
+    userService.logoutUser(dbUser, req, userAgent);
+    
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success logout user"));
+  }
   
+
   @GetMapping(value = "/sessions")
   public ResponseEntity<JsonApiListResponse> getUserSessionHandler(@AuthenticationPrincipal User user) {
     List<UserSession> sessions = userService.getUserSession(user);

@@ -31,12 +31,17 @@ public class JwtUtil {
   }
 
   public String generateRefreshToken(String email) {
+    Date expiredDate = expiredDateRefreshToken();
     return Jwts.builder()
       .subject(email)
       .issuedAt(new Date())
-      .expiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000)) // 7 days
+      .expiration(expiredDate)
       .signWith(key)
       .compact();
+  }
+
+  public Date expiredDateRefreshToken() {
+    return new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
   }
 
   public Map<String, Object> generateClaims(String name) {

@@ -20,6 +20,7 @@ import com.example.learnrest.dto.request.auth.RegisterRequest;
 import com.example.learnrest.dto.request.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.request.auth.ValidateRequest;
 import com.example.learnrest.dto.request.user.ChangePasswordRequest;
+import com.example.learnrest.dto.request.user.LogoutRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserSession;
 import com.example.learnrest.exception.DuplicateEmailException;
@@ -48,7 +49,7 @@ public class UserService {
     this.userSessionRepository = userSessionRepository;
   }
 
-  public Map<String, Object> registerUser(RegisterRequest req, String ipAddress, String userAgent) {
+  public void registerUser(RegisterRequest req) {
     if (userRepository.existsByEmail(req.getEmail())) {
       throw new DuplicateEmailException("Email already registered");
     }
@@ -69,32 +70,6 @@ public class UserService {
 
     // send email
     emailService.sendEmailValidationUser(req.getEmail(), validationToken);
-
-    // claims token
-    Map<String, Object> claims = jwtUtil.generateClaims(req.getName());
-
-    // token
-    String token = jwtUtil.generateToken(req.getEmail(), claims);
-    String refreshToken = jwtUtil.generateRefreshToken(req.getEmail());
-
-    // save session
-    UserSession session = new UserSession();
-    session.setUser(user);
-    session.setRefreshToken(refreshToken);
-    session.setIpAddress(ipAddress);
-    session.setDeviceInfo(userAgent);
-    session.setLoggedInAt(new Date());
-    session.setExpiresAt(new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000)); // 7 days
-    session.setRevoked(false);
-    userSessionRepository.save(session);
-
-    // result
-    Map<String, Object> responseData = new HashMap<>();
-    responseData.put("id", '-');
-    responseData.put("accessToken", token);
-    responseData.put("refreshToken", refreshToken);
-
-    return responseData;
   }
 
   public void validateEmail(ValidateRequest req) {
@@ -115,7 +90,7 @@ public class UserService {
     userRepository.save(user);
   }
 
-  public Map<String, Object> loginUser(LoginRequest req) {
+  public Map<String, Object> loginUser(LoginRequest req, String ipAddress, String userAgent) {
     // Find the user by email
     User user = userRepository.findByEmail(req.getEmail())
     .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
@@ -133,7 +108,35 @@ public class UserService {
     // Generate JWT tokens
     Map<String, Object> claims = jwtUtil.generateClaims(user.getName());
     String accessToken = jwtUtil.generateToken(user.getEmail(), claims);
+
+    // Try to reuse existing session
+    Optional<UserSession> existingSession = userSessionRepository
+        .findFirstByUserAndDeviceInfoAndRevokedFalseOrderByLoggedInAtDesc(user, userAgent);
+    if (existingSession.isPresent()) {
+        UserSession session = existingSession.get();
+
+        // Check if token not expired
+        if (session.getExpiresAt().after(new Date())) {
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("id", user.getId());
+            responseData.put("accessToken", accessToken);
+            responseData.put("refreshToken", session.getRefreshToken());
+            return responseData;
+        }
+    }
+
     String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
+    // Save new session
+    UserSession newSession = new UserSession();
+    newSession.setUser(user);
+    newSession.setDeviceInfo(userAgent);
+    newSession.setIpAddress(ipAddress);
+    newSession.setRefreshToken(refreshToken);
+    newSession.setLoggedInAt(new Date());
+    newSession.setExpiresAt(jwtUtil.expiredDateRefreshToken());
+    newSession.setRevoked(false);
+    userSessionRepository.save(newSession);
 
     // Build the response data
     Map<String, Object> responseData = new HashMap<>();
@@ -231,5 +234,21 @@ public class UserService {
     user.setPassword(passwordEncoder.encode(req.getPassword()));
 
     userRepository.save(user);
+  }
+
+  public void logoutUser(User user, LogoutRequest req, String userAgent) {
+    // Find active session
+    Optional<UserSession> sessionOpt = userSessionRepository
+        .findByUserAndRefreshTokenAndDeviceInfoAndRevokedFalse(
+            user, req.getRefreshToken(), userAgent
+        );
+
+    // If session found, revoke it
+    if (sessionOpt.isPresent()) {
+        UserSession session = sessionOpt.get();
+        session.setRevoked(true);
+        session.setLastUsedAt(new Date());
+        userSessionRepository.save(session);
+    }
   }
 }

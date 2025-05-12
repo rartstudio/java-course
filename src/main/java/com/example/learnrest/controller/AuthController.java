@@ -34,13 +34,9 @@ public class AuthController {
 
   @PostMapping("/register")
   public ResponseEntity<JsonApiSingleResponse> registerHandler(@Valid @RequestBody RegisterRequest req, HttpServletRequest request) {  
-    // Get IP address and user agent
-    String ipAddress = request.getRemoteAddr();
-    String userAgent = request.getHeader("User-Agent");
-
-    Map<String, Object> responseData = userService.registerUser(req, ipAddress, userAgent);
+    userService.registerUser(req);
     
-    return ResponseEntity.status(HttpStatus.CREATED).body(JsonApiHelper.createSingleResponse("users", responseData, "Success registering user"));
+    return ResponseEntity.status(HttpStatus.CREATED).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success registering user"));
   }
 
   @PostMapping("/validate")
@@ -51,8 +47,12 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<JsonApiSingleResponse> loginHandler(@Valid @RequestBody LoginRequest req) {
-    Map<String, Object> responseData = userService.loginUser(req);
+  public ResponseEntity<JsonApiSingleResponse> loginHandler(@Valid @RequestBody LoginRequest req,HttpServletRequest request ) {
+    // Get IP address and user agent
+    String ipAddress = request.getRemoteAddr();
+    String userAgent = request.getHeader("User-Agent");
+
+    Map<String, Object> responseData = userService.loginUser(req, ipAddress, userAgent);
     
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", responseData, "Success login"));
   }
