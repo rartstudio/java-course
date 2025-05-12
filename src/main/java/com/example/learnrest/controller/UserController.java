@@ -12,11 +12,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.learnrest.dto.JsonApiListResponse;
 import com.example.learnrest.dto.JsonApiSingleResponse;
+import com.example.learnrest.dto.request.user.ChangePasswordRequest;
 import com.example.learnrest.dto.request.user.CreateProfileForm;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserProfile;
@@ -73,6 +75,15 @@ public class UserController {
     attributes.put("dateOfBirth", profile.getDateOfBirth());
       
     return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success create user profile"));
+  }
+
+  @PostMapping(value="/change-password")
+  public ResponseEntity<JsonApiSingleResponse> changePasswordHandler(@Valid @RequestBody ChangePasswordRequest req,  @AuthenticationPrincipal User user) {
+    User dbUser = userService.getUser(user.getEmail());
+
+    userService.changePassword(req, dbUser);
+
+    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success change password"));
   }
   
   @GetMapping(value = "/sessions")

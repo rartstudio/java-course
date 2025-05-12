@@ -19,6 +19,7 @@ import com.example.learnrest.dto.request.auth.RefreshTokenRequest;
 import com.example.learnrest.dto.request.auth.RegisterRequest;
 import com.example.learnrest.dto.request.auth.ResetPasswordRequest;
 import com.example.learnrest.dto.request.auth.ValidateRequest;
+import com.example.learnrest.dto.request.user.ChangePasswordRequest;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserSession;
 import com.example.learnrest.exception.DuplicateEmailException;
@@ -26,7 +27,6 @@ import com.example.learnrest.exception.InvalidCredentialsException;
 import com.example.learnrest.exception.InvalidRefreshTokenException;
 import com.example.learnrest.exception.NotFoundException;
 import com.example.learnrest.exception.ValidationTokenExpiredException;
-import com.example.learnrest.repository.UserProfileRepository;
 import com.example.learnrest.repository.UserRepository;
 import com.example.learnrest.repository.UserSessionRepository;
 import com.example.learnrest.security.JwtUtil;
@@ -221,5 +221,15 @@ public class UserService {
     User user = userRepository.findByIdWithProfile(id).orElseThrow(() -> new NotFoundException("User not found"));
 
     return user;
+  }
+
+  public void changePassword(ChangePasswordRequest req, User user) {
+    if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+      throw new InvalidCredentialsException("Invalid current password");
+    }
+
+    user.setPassword(passwordEncoder.encode(req.getPassword()));
+
+    userRepository.save(user);
   }
 }
