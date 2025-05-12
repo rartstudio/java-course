@@ -8,7 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.learnrest.validation.ValidImage;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class CreateProfileForm {
   @NotNull(message= "Image is required")
   @ValidImage
@@ -17,21 +21,4 @@ public class CreateProfileForm {
   @NotNull(message = "Date of birth is required")
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   private LocalDate dateOfBirth;
-
-  // Getters and Setters
-  public MultipartFile getImage() {
-    return image;
-  }
-
-  public void setImage(MultipartFile image) {
-    this.image = image;
-  }
-
-  public LocalDate getDateOfBirth() {
-    return dateOfBirth;
-  }
-
-  public void setDateOfBirth(LocalDate dateOfBirth) {
-    this.dateOfBirth = dateOfBirth;
-  }
 }
