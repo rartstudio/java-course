@@ -42,13 +42,15 @@ public class UserService {
   private final EmailService emailService;
   private final UserSessionRepository userSessionRepository;
   private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+  private final RedisTokenService redisTokenService;
 
-  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, UserSessionRepository userSessionRepository) {
+  public UserService(UserRepository userRepository, JwtUtil jwtUtil, PasswordEncoder passwordEncoder, EmailService emailService, UserSessionRepository userSessionRepository, RedisTokenService redisTokenService) {
     this.userRepository = userRepository;
     this.jwtUtil = jwtUtil;
     this.passwordEncoder = passwordEncoder;
     this.emailService = emailService;
     this.userSessionRepository = userSessionRepository;
+    this.redisTokenService = redisTokenService;
   }
 
   public void registerUser(RegisterRequest req) {
@@ -110,6 +112,13 @@ public class UserService {
     // Generate JWT tokens
     Map<String, Object> claims = jwtUtil.generateClaims(user.getName());
     String accessToken = jwtUtil.generateToken(user.getEmail(), claims);
+
+    // TTL in seconds for Redis
+    Date expiration = jwtUtil.expiredDateAccessToken();
+    long ttlInSeconds = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+    logger.info("Expiration time" + expiration.getTime());
+
+    redisTokenService.storeAccessToken(user.getEmail(), accessToken, ttlInSeconds);
 
     // Try to reuse existing session
     Optional<UserSession> existingSession = userSessionRepository

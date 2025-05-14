@@ -21,11 +21,12 @@ public class JwtUtil {
   }
 
   public String generateToken(String subject, Map<String, Object> extraClaims) {
+    Date expiredDate = this.expiredDateAccessToken();
     return Jwts.builder()
       .subject(subject)
       .claims(extraClaims)
       .issuedAt(new Date())
-      .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
+      .expiration(expiredDate) // 10 hours
       .signWith(key)
       .compact();
   }
@@ -38,6 +39,11 @@ public class JwtUtil {
       .expiration(expiredDate)
       .signWith(key)
       .compact();
+  }
+
+  public Date expiredDateAccessToken() {
+    // return new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10);
+    return new Date(System.currentTimeMillis() + 1000 * 60 * 1); // 5 minute
   }
 
   public Date expiredDateRefreshToken() {
