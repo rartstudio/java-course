@@ -14,6 +14,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.example.learnrest.entity.User;
 import com.example.learnrest.exception.JwtAuthenticationException;
 import com.example.learnrest.repository.UserRepository;
+import com.example.learnrest.service.RedisTokenService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,11 +26,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtUtil jwtUtil;
   private final UserRepository userRepository;
   private final HandlerExceptionResolver handlerExceptionResolver;
+  private final RedisTokenService redisTokenService;
 
-  public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository, HandlerExceptionResolver handlerExceptionResolver) {
+  public JwtAuthenticationFilter(JwtUtil jwtUtil, UserRepository userRepository, HandlerExceptionResolver handlerExceptionResolver, RedisTokenService redisTokenService) {
     this.jwtUtil = jwtUtil;
     this.userRepository = userRepository;
     this.handlerExceptionResolver = handlerExceptionResolver;
+    this.redisTokenService = redisTokenService;
   }
 
   @Override
@@ -53,6 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       }
   
       String email = jwtUtil.extractSubject(token);
+
+      String existingToken = redisTokenService.getAccessToken(email);
+      if (existingToken == null) throw new JwtAuthenticationException("Access token not found please relogin");
+
       User user = userRepository.findByEmail(email).orElseThrow(() -> 
         new JwtAuthenticationException("User not found")
       );

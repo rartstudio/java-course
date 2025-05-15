@@ -22,7 +22,9 @@ public class RedisTokenService {
     logger.info("Saving token to Redis with key: " + token);
   }
 
-  public boolean isAccessTokenValid(String token) {
-      return Boolean.TRUE.equals(redisTemplate.hasKey(token));
+  public String getAccessToken(String email) {
+    String token = redisTemplate.opsForValue().get(email);
+    logger.info("🔍 Retrieved token from Redis for key '{}': {}", email, token);
+    return token;
   }
 }

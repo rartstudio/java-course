@@ -43,7 +43,7 @@ public class JwtUtil {
 
   public Date expiredDateAccessToken() {
     // return new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10);
-    return new Date(System.currentTimeMillis() + 1000 * 60 * 1); // 5 minute
+    return new Date(System.currentTimeMillis() + 1000 * 60 * 5); // 5 minute
   }
 
   public Date expiredDateRefreshToken() {
