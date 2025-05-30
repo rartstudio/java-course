@@ -16,3 +16,8 @@
 ./gradlew --stop
 ./gradlew clean bootRun
 ```
+
+##### Refresh dependencies
+```bash
+./gradlew build --refresh-dependencies
+```
