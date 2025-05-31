@@ -22,8 +22,15 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable()) // Disable CSRF using Lambda DSL
         .authorizeHttpRequests(auth -> auth
-        // .requestMatchers("/api/v1/users/**").authenticated()
-        .anyRequest().authenticated()
+        .requestMatchers(
+              "/api/v1/auth/**",
+              "/swagger-ui/**",
+              "/v3/api-docs/**",
+              "/swagger-ui.html",
+              "/swagger-resources/**",
+              "/webjars/**"
+          ).permitAll()
+          .anyRequest().authenticated()
         ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
