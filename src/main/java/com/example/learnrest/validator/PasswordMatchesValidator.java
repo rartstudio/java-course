@@ -19,12 +19,12 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
             String confirmPassword = (String) getConfirmPassword.invoke(obj);
 
             if (password == null || confirmPassword == null || !password.equals(confirmPassword)) {
-              // Show the error at the class level
-              context.disableDefaultConstraintViolation();
-              context.buildConstraintViolationWithTemplate("Passwords do not match")
-                    .addPropertyNode("confirmPassword") // or omit this to attach to the object
-                    .addConstraintViolation();
-              return false;
+                // Show the error at the class level
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate("Passwords do not match")
+                        .addPropertyNode("confirmPassword") // or omit this to attach to the object
+                        .addConstraintViolation();
+                return false;
             }
 
             return true;

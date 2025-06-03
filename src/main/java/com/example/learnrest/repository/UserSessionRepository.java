@@ -9,8 +9,12 @@ import com.example.learnrest.entity.User;
 import com.example.learnrest.entity.UserSession;
 
 public interface UserSessionRepository extends JpaRepository<UserSession, Long> {
-  List<UserSession> findByUser(User user);
-  List<UserSession> findByUserAndRevokedFalse(User user);
-  Optional<UserSession> findFirstByUserAndDeviceInfoAndRevokedFalseOrderByLoggedInAtDesc(User user, String userAgent);
-  Optional<UserSession> findByUserAndRefreshTokenAndDeviceInfoAndRevokedFalse(User user, String refreshToken, String deviceInfo);
+    List<UserSession> findByUser(User user);
+
+    List<UserSession> findByUserAndRevokedFalse(User user);
+
+    Optional<UserSession> findFirstByUserAndDeviceInfoAndRevokedFalseOrderByLoggedInAtDesc(User user, String userAgent);
+
+    Optional<UserSession> findByUserAndRefreshTokenAndDeviceInfoAndRevokedFalse(User user, String refreshToken,
+            String deviceInfo);
 }

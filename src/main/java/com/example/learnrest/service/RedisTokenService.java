@@ -9,22 +9,22 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RedisTokenService {
-  private final RedisTemplate<String, String> redisTemplate;
-  private static final Logger logger = LoggerFactory.getLogger(RedisTokenService.class);
-  
-  public RedisTokenService(RedisTemplate<String, String> redisTemplate) {
-      this.redisTemplate = redisTemplate;
-  }
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(RedisTokenService.class);
 
-  public void storeAccessToken(String email, String token, long ttlInSeconds) {
-    logger.info("📆 TTL in seconds: " + ttlInSeconds);
-    redisTemplate.opsForValue().set(email, token, ttlInSeconds, TimeUnit.SECONDS);
-    logger.info("Saving token to Redis with key: " + token);
-  }
+    public RedisTokenService(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
-  public String getAccessToken(String email) {
-    String token = redisTemplate.opsForValue().get(email);
-    logger.info("🔍 Retrieved token from Redis for key '{}': {}", email, token);
-    return token;
-  }
+    public void storeAccessToken(String email, String token, long ttlInSeconds) {
+        logger.info("📆 TTL in seconds: " + ttlInSeconds);
+        redisTemplate.opsForValue().set(email, token, ttlInSeconds, TimeUnit.SECONDS);
+        logger.info("Saving token to Redis with key: " + token);
+    }
+
+    public String getAccessToken(String email) {
+        String token = redisTemplate.opsForValue().get(email);
+        logger.info("🔍 Retrieved token from Redis for key '{}': {}", email, token);
+        return token;
+    }
 }

@@ -18,21 +18,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String name;
-  private String email;
-  private String password;
+    private String name;
+    private String email;
+    private String password;
 
-  private String validationToken;
-  private LocalDateTime validationTokenExpiry;
-  private LocalDateTime userValidateAt;
+    private String validationToken;
+    private LocalDateTime validationTokenExpiry;
+    private LocalDateTime userValidateAt;
 
-  private String resetPasswordToken;
-  private LocalDateTime resetPasswordTokenExpiry;
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordTokenExpiry;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch= FetchType.LAZY)
-  private UserProfile profile;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserProfile profile;
 }

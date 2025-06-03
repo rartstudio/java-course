@@ -19,12 +19,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Validation Error", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -46,12 +45,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation -> 
-            errors.put(violation.getPropertyPath().toString(), violation.getMessage())
-        );
+        ex.getConstraintViolations()
+                .forEach(violation -> errors.put(violation.getPropertyPath().toString(), violation.getMessage()));
 
         errorResponse.put("errors", buildJsonApiErrors(HttpStatus.BAD_REQUEST, "Constraint Violation", errors));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -60,7 +58,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateEmailException(DuplicateEmailException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -72,7 +70,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -84,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, Object>> handleConflictException(ConflictException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -96,7 +94,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -106,9 +104,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ValidationTokenExpiredException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationTokenEmailExpiredException(ValidationTokenExpiredException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidationTokenEmailExpiredException(
+            ValidationTokenExpiredException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -120,7 +119,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidRefreshTokenException(InvalidRefreshTokenException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -132,7 +131,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataConflictException.class)
     public ResponseEntity<Map<String, Object>> handleDataConflictException(DataConflictException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("-", ex.getMessage());
@@ -144,7 +143,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFoundException(NotFoundException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -156,7 +155,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ImageUploadException.class)
     public ResponseEntity<Map<String, Object>> handleImageUploadException(ImageUploadException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
-        
+
         // Build the errors array
         Map<String, String> errors = new HashMap<>();
         errors.put("email", ex.getMessage());
@@ -167,25 +166,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JwtAuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleJwtAuthenticationException(JwtAuthenticationException ex) {
-      Map<String, Object> errorResponse = new HashMap<>();
-      
-      Map<String, String> errors = new HashMap<>();
-      errors.put("authorization", ex.getMessage());
+        Map<String, Object> errorResponse = new HashMap<>();
 
-      errorResponse.put("errors", buildJsonApiErrors(ex.getStatus(), "JWT Authentication Failed", errors));
-      return new ResponseEntity<>(errorResponse, ex.getStatus());
+        Map<String, String> errors = new HashMap<>();
+        errors.put("authorization", ex.getMessage());
+
+        errorResponse.put("errors", buildJsonApiErrors(ex.getStatus(), "JWT Authentication Failed", errors));
+        return new ResponseEntity<>(errorResponse, ex.getStatus());
     }
 
     private Object[] buildJsonApiErrors(HttpStatus status, String title, Map<String, String> errors) {
         return errors.entrySet().stream()
-            .map(entry -> {
-                Map<String, Object> errorDetails = new HashMap<>();
-                errorDetails.put("status", String.valueOf(status.value()));
-                errorDetails.put("title", title);
-                errorDetails.put("detail", entry.getValue());
-                errorDetails.put("source", Map.of("pointer", entry.getKey()));
-                return errorDetails;
-            })
-            .toArray();
+                .map(entry -> {
+                    Map<String, Object> errorDetails = new HashMap<>();
+                    errorDetails.put("status", String.valueOf(status.value()));
+                    errorDetails.put("title", title);
+                    errorDetails.put("detail", entry.getValue());
+                    errorDetails.put("source", Map.of("pointer", entry.getKey()));
+                    return errorDetails;
+                })
+                .toArray();
     }
 }

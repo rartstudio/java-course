@@ -14,37 +14,37 @@ import com.example.learnrest.repository.UserProfileRepository;
 @Service
 public class UserProfileService {
 
-  private final UserProfileRepository userProfileRepository;
-  private final S3Service s3Service;
-  
-  public UserProfileService(UserProfileRepository userProfileRepository, S3Service s3Service) {
-    this.userProfileRepository = userProfileRepository;
-    this.s3Service = s3Service;
-  }
+    private final UserProfileRepository userProfileRepository;
+    private final S3Service s3Service;
 
-  public UserProfile createProfile(CreateProfileForm form, User user) {
-    MultipartFile image = form.getImage();
-
-    String imageUrl;
-    try {
-      imageUrl = s3Service.uploadFile(image);
-    } catch (Exception e) {
-      throw new ImageUploadException("Failed to upload image to S3");
+    public UserProfileService(UserProfileRepository userProfileRepository, S3Service s3Service) {
+        this.userProfileRepository = userProfileRepository;
+        this.s3Service = s3Service;
     }
 
-    UserProfile profile = new UserProfile();
-    profile.setDateOfBirth(form.getDateOfBirth());
-    profile.setImage(imageUrl);
-    profile.setUser(user);
+    public UserProfile createProfile(CreateProfileForm form, User user) {
+        MultipartFile image = form.getImage();
 
-    userProfileRepository.save(profile);
+        String imageUrl;
+        try {
+            imageUrl = s3Service.uploadFile(image);
+        } catch (Exception e) {
+            throw new ImageUploadException("Failed to upload image to S3");
+        }
 
-    UserProfile saved = userProfileRepository.save(profile);
+        UserProfile profile = new UserProfile();
+        profile.setDateOfBirth(form.getDateOfBirth());
+        profile.setImage(imageUrl);
+        profile.setUser(user);
 
-    return saved;
-  }
+        userProfileRepository.save(profile);
 
-  public Optional<UserProfile> getProfile(User user) {
-    return userProfileRepository.findByUser(user);
-  }
+        UserProfile saved = userProfileRepository.save(profile);
+
+        return saved;
+    }
+
+    public Optional<UserProfile> getProfile(User user) {
+        return userProfileRepository.findByUser(user);
+    }
 }

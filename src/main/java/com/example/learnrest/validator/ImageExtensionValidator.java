@@ -11,13 +11,14 @@ public class ImageExtensionValidator implements ConstraintValidator<ValidImage, 
 
     @Override
     public boolean isValid(MultipartFile file, ConstraintValidatorContext context) {
-        if (file == null || file.isEmpty()) return false;
+        if (file == null || file.isEmpty())
+            return false;
 
         String originalName = file.getOriginalFilename();
-        if (originalName == null) return false;
+        if (originalName == null)
+            return false;
 
         String lower = originalName.toLowerCase();
         return lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png");
     }
 }
-

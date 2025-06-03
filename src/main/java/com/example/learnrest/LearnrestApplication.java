@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class LearnrestApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(LearnrestApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(LearnrestApplication.class, args);
+    }
 
 }

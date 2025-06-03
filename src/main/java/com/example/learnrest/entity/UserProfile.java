@@ -17,14 +17,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserProfile {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String image;
-  private LocalDate dateOfBirth;
+    private String image;
+    private LocalDate dateOfBirth;
 
-  @OneToOne
-  @JoinColumn(name= "user_id", referencedColumnName= "id")
-  private User user;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private User user;
 }

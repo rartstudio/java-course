@@ -37,95 +37,106 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-  private final UserService userService;
-  private final UserProfileService userProfileService;
+    private final UserService userService;
+    private final UserProfileService userProfileService;
 
-  public UserController(UserService userService, UserProfileService userProfileService) {
-    this.userService = userService;
-    this.userProfileService = userProfileService;
-  }
-
-  @GetMapping("/profile")
-  public ResponseEntity<JsonApiSingleResponse> getProfileHandler(@AuthenticationPrincipal User user) {
-    // Fetch user from the database to ensure
-    User dbUser = userService.getUserData(user.getId());
-
-    UserProfile profile = dbUser.getProfile(); // might be null
-
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("id", dbUser.getId());
-    attributes.put("name", dbUser.getName());
-    attributes.put("email", dbUser.getEmail());
-    attributes.put("image", profile != null ? profile.getImage() : null);
-    attributes.put("dateOfBirth", profile != null ? profile.getDateOfBirth() : null);
-
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success get user profile"));
-  }
-
-  @PostMapping(value = "/profile", consumes={MediaType.MULTIPART_FORM_DATA_VALUE})
-  public ResponseEntity<JsonApiSingleResponse> createProfileHandler(@Valid @ModelAttribute CreateProfileForm form,  @AuthenticationPrincipal User user) {
-    User dbUser = userService.getUser(user.getEmail());
-
-    Optional<UserProfile> userProfile = userProfileService.getProfile(dbUser);
-
-    if (userProfile.isPresent()) {
-      throw new DataConflictException("Data profile sudah ada");
+    public UserController(UserService userService, UserProfileService userProfileService) {
+        this.userService = userService;
+        this.userProfileService = userProfileService;
     }
 
-    UserProfile profile = userProfileService.createProfile(form, user);
+    @GetMapping("/profile")
+    public ResponseEntity<JsonApiSingleResponse> getProfileHandler(@AuthenticationPrincipal User user) {
+        // Fetch user from the database to ensure
+        User dbUser = userService.getUserData(user.getId());
 
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("image", profile.getImage());
-    attributes.put("dateOfBirth", profile.getDateOfBirth());
-      
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createSingleResponse("users", attributes, "Success create user profile"));
-  }
+        UserProfile profile = dbUser.getProfile(); // might be null
 
-  @PostMapping("/change-password")
-  public ResponseEntity<JsonApiSingleResponse> changePasswordHandler(@Valid @RequestBody ChangePasswordRequest req,  @AuthenticationPrincipal User user) {
-    User dbUser = userService.getUser(user.getEmail());
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", dbUser.getId());
+        attributes.put("name", dbUser.getName());
+        attributes.put("email", dbUser.getEmail());
+        attributes.put("image", profile != null ? profile.getImage() : null);
+        attributes.put("dateOfBirth", profile != null ? profile.getDateOfBirth() : null);
 
-    userService.changePassword(req, dbUser);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createSingleResponse("users", attributes, "Success get user profile"));
+    }
 
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success change password"));
-  }
+    @PostMapping(value = "/profile", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<JsonApiSingleResponse> createProfileHandler(@Valid @ModelAttribute CreateProfileForm form,
+            @AuthenticationPrincipal User user) {
+        User dbUser = userService.getUser(user.getEmail());
 
-  @PostMapping("/logout")
-  public ResponseEntity<JsonApiSingleResponse> logoutHandler(@Valid @RequestBody LogoutRequest req, @AuthenticationPrincipal User user, HttpServletRequest request) {
-    User dbUser = userService.getUser(user.getEmail());
+        Optional<UserProfile> userProfile = userProfileService.getProfile(dbUser);
 
-    String userAgent = request.getHeader("User-Agent");
+        if (userProfile.isPresent()) {
+            throw new DataConflictException("Data profile sudah ada");
+        }
 
-    userService.logoutUser(dbUser, req, userAgent);
-    
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success logout user"));
-  }
-  
+        UserProfile profile = userProfileService.createProfile(form, user);
 
-  @GetMapping(value = "/sessions")
-  public ResponseEntity<JsonApiListResponse> getUserSessionHandler(@AuthenticationPrincipal User user) {
-    List<UserSession> sessions = userService.getUserSession(user);
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("image", profile.getImage());
+        attributes.put("dateOfBirth", profile.getDateOfBirth());
 
-    List<Map<String, Object>> attributes = sessions.stream()
-        .map(session -> {
-            Map<String, Object> item = new HashMap<>();
-            item.put("id", session.getId());
-            item.put("deviceInfo", session.getDeviceInfo());
-            item.put("ipAddress", session.getIpAddress());
-            item.put("loggedInAt", session.getLoggedInAt());
-            item.put("revoked", session.isRevoked());
-            return item;
-        })
-        .toList();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createSingleResponse("users", attributes, "Success create user profile"));
+    }
 
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createListResponse("user_sessions", attributes,"Success get user sessions"));
-  }
+    @PostMapping("/change-password")
+    public ResponseEntity<JsonApiSingleResponse> changePasswordHandler(@Valid @RequestBody ChangePasswordRequest req,
+            @AuthenticationPrincipal User user) {
+        User dbUser = userService.getUser(user.getEmail());
 
-  @DeleteMapping(value = "/sessions/{id}")
-  public ResponseEntity<JsonApiSingleResponse> deleteUserSessionHandler(@AuthenticationPrincipal User user, @PathVariable Long id) {
-    User dbUser = userService.getUser(user.getEmail());
-    userService.removeUserSession(dbUser, id);
-    
-    return ResponseEntity.status(HttpStatus.OK).body(JsonApiHelper.createEmptySingleResponse("user_sessions", "-", "Success remove session"));
-  }
+        userService.changePassword(req, dbUser);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success change password"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<JsonApiSingleResponse> logoutHandler(@Valid @RequestBody LogoutRequest req,
+            @AuthenticationPrincipal User user, HttpServletRequest request) {
+        User dbUser = userService.getUser(user.getEmail());
+
+        // Get IP address and user agent
+        String ipAddress = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+
+        userService.logoutUser(dbUser, req, ipAddress, userAgent);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createEmptySingleResponse("users", "-", "Success logout user"));
+    }
+
+    @GetMapping(value = "/sessions")
+    public ResponseEntity<JsonApiListResponse> getUserSessionHandler(@AuthenticationPrincipal User user) {
+        List<UserSession> sessions = userService.getUserSession(user);
+
+        List<Map<String, Object>> attributes = sessions.stream()
+                .map(session -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("id", session.getId());
+                    item.put("deviceInfo", session.getDeviceInfo());
+                    item.put("ipAddress", session.getIpAddress());
+                    item.put("loggedInAt", session.getLoggedInAt());
+                    item.put("revoked", session.isRevoked());
+                    return item;
+                })
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createListResponse("user_sessions", attributes, "Success get user sessions"));
+    }
+
+    @DeleteMapping(value = "/sessions/{id}")
+    public ResponseEntity<JsonApiSingleResponse> deleteUserSessionHandler(@AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        User dbUser = userService.getUser(user.getEmail());
+        userService.removeUserSession(dbUser, id);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(JsonApiHelper.createEmptySingleResponse("user_sessions", "-", "Success remove session"));
+    }
 }

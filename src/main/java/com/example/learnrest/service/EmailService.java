@@ -9,40 +9,40 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-  private final JavaMailSender mailSender;
-  private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
-  
-  public EmailService(JavaMailSender mailSender) {
-    this.mailSender = mailSender;
-  }
+    private final JavaMailSender mailSender;
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
-  @Async
-  public void sendEmailValidationUser(String to, String validationToken) {
-    logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
-    String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom("no-reply@example.com");
-    message.setTo(to);
-    message.setSubject("Verify Your Email Address");
-    message.setText("Please click the link below to validate your email address:\n\n" + validationLink);
-    mailSender.send(message);
+    @Async
+    public void sendEmailValidationUser(String to, String validationToken) {
+        logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
 
-    logger.info("Email sent successfully to: {}", to);
-  }
+        String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("no-reply@example.com");
+        message.setTo(to);
+        message.setSubject("Verify Your Email Address");
+        message.setText("Please click the link below to validate your email address:\n\n" + validationLink);
+        mailSender.send(message);
 
-  @Async
-  public void sendEmailResetPassword(String to, String validationToken) {
-    logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
+        logger.info("Email sent successfully to: {}", to);
+    }
 
-    String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom("no-reply@example.com");
-    message.setTo(to);
-    message.setSubject("Verify Your Email Address");
-    message.setText("Please click the link below to reset your password:\n\n" + validationLink);
-    mailSender.send(message);
+    @Async
+    public void sendEmailResetPassword(String to, String validationToken) {
+        logger.info("Sending email asynchronously on thread: {}", Thread.currentThread().getName());
 
-    logger.info("Email sent successfully to: {}", to);
-  }
+        String validationLink = "http://localhost:8080/api/v1/auth/validate?token=" + validationToken;
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("no-reply@example.com");
+        message.setTo(to);
+        message.setSubject("Verify Your Email Address");
+        message.setText("Please click the link below to reset your password:\n\n" + validationLink);
+        mailSender.send(message);
+
+        logger.info("Email sent successfully to: {}", to);
+    }
 }
